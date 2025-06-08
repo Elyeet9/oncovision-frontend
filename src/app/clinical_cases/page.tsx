@@ -123,45 +123,73 @@ export default function ClinicalCases() {
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <div className="w-full sm:w-auto">
+                <div className="w-full sm:w-auto relative">
                   <label htmlFor="caseIdSearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                     ID de Caso
                   </label>
-                  <input
-                    id="caseIdSearch"
-                    type="text"
-                    value={caseIdSearch}
-                    onChange={(e) => setCaseIdSearch(e.target.value)}
-                    placeholder="Buscar por ID"
-                    className="w-full sm:w-40 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  />
+                  <div className="relative">
+                    <input
+                      id="caseIdSearch"
+                      type="text"
+                      value={caseIdSearch}
+                      onChange={(e) => setCaseIdSearch(e.target.value)}
+                      placeholder="Buscar por ID"
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                    {caseIdSearch && (
+                      <button
+                        onClick={() => setCaseIdSearch('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        aria-label="Clear case ID search"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="w-full sm:w-auto">
+                <div className="w-full sm:w-auto relative">
                   <label htmlFor="patientIdSearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                     ID de Paciente
                   </label>
-                  <input
-                    id="patientIdSearch"
-                    type="text"
-                    value={patientIdSearch}
-                    onChange={(e) => setPatientIdSearch(e.target.value)}
-                    placeholder="Buscar por paciente"
-                    className="w-full sm:w-40 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  />
+                  <div className="relative">
+                    <input
+                      id="patientIdSearch"
+                      type="text"
+                      value={patientIdSearch}
+                      onChange={(e) => setPatientIdSearch(e.target.value)}
+                      placeholder="Buscar por paciente"
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                    {patientIdSearch && (
+                      <button
+                        onClick={() => setPatientIdSearch('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        aria-label="Clear patient ID search"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2 w-full sm:w-auto justify-end">
-                <button
+                {(caseIdSearch || patientIdSearch) && (
+                  <button
                     onClick={resetSearch}
                     className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     disabled={loading}
                     aria-label="Clear all filters"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     Limpiar
-                </button>
+                  </button>
+                )}
                 <button 
                   onClick={handleFilter}
                   className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
