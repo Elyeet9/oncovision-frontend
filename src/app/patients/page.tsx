@@ -19,18 +19,20 @@ export default function PatientsPage() {
   
   // Add search state
   const [nameSearch, setNameSearch] = useState('');
+  const [lastNameSearch, setLastNameSearch] = useState('');
   const [idNumberSearch, setIdNumberSearch] = useState('');
   const [historySearch, setHistorySearch] = useState('');
 
   // Function to reset search fields and reload all patients
   const resetSearch = async () => {
     setNameSearch('');
+    setLastNameSearch('');
     setIdNumberSearch('');
     setHistorySearch('');
     await fetchPatients();
   };
 
-  const fetchPatients = async (name = '', idNumber = '', history = '') => {
+  const fetchPatients = async (name = '', lastName = '', idNumber = '', history = '') => {
     try {
       setLoading(true);
       let url = 'http://127.0.0.1:8080/patients/patient_list';
@@ -38,6 +40,7 @@ export default function PatientsPage() {
       // Add query parameters if provided
       const params = new URLSearchParams();
       if (name) params.append('name', name);
+      if (lastName) params.append('last_name', lastName);
       if (idNumber) params.append('id_number', idNumber);
       if (history) params.append('clinical_history', history);
       
@@ -68,16 +71,42 @@ export default function PatientsPage() {
 
   const handleAddPatient = async () => {
     try {
-      // Navigate to patient creation form
-      router.push('/patients/new');
+      setLoading(true);
+      const response = await fetch('http://127.0.0.1:8080/patients/patient_create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          names: nameSearch,
+          last_names: lastNameSearch,
+          id_number: idNumberSearch,
+          clinical_history: historySearch,
+        }),
+      });
+      
+      if (!response.ok) {
+        // Get the error message from the response
+        const errorData = await response.json();
+        console.error('Error creating clinical case:', errorData.error);
+        throw new Error('Failed to create clinical case: ' + errorData.error);
+      }
+      
+      // Reset the filters and fetch patients
+      resetSearch();
+      
+      // Show success message
+      alert('Caso clínico creado exitosamente');
     } catch (err) {
-      console.error('Error navigating to new patient form:', err);
-      alert('Error al acceder al formulario de paciente nuevo.');
+      console.error('Error creating clinical case:', err);
+      alert('Error al crear el caso clínico. Por favor, inténtelo de nuevo. ' + err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleFilter = () => {
-    fetchPatients(nameSearch, idNumberSearch, historySearch);
+    fetchPatients(nameSearch, lastNameSearch, idNumberSearch, historySearch);
   };
 
   useEffect(() => {
@@ -118,6 +147,32 @@ export default function PatientsPage() {
                         onClick={() => setNameSearch('')}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         aria-label="Clear name search"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full sm:w-auto relative">
+                  <label htmlFor="nameSearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    Apellido de Paciente
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="lastNameSearch"
+                      type="text"
+                      value={lastNameSearch}
+                      onChange={(e) => setLastNameSearch(e.target.value)}
+                      placeholder="Buscar por apellido"
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                    {lastNameSearch && (
+                      <button
+                        onClick={() => setLastNameSearch('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        aria-label="Clear last name search"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
