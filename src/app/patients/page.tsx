@@ -121,31 +121,28 @@ export default function PatientsPage() {
   return (
     <>
       <Navbar />
-      <div className="pt-24 pb-10 px-4 md:px-8 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="pt-24 pb-10 px-4 md:px-8 min-h-screen bg-gray-50 dark:bg-gray-900 main">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Pacientes</h1>
           
           {/* Search and filter fields */}
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6 filter-box">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-4 w-full">
                 <div className="w-full sm:w-auto relative">
-                  <label htmlFor="nameSearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    Nombre de Paciente
-                  </label>
-                  <div className="relative">
+                  <div className="relative input-group name">
                     <input
                       id="nameSearch"
                       type="text"
                       value={nameSearch}
                       onChange={(e) => setNameSearch(e.target.value)}
-                      placeholder="Buscar por nombre"
-                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="Nombre PX."
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 filter-text"
                     />
                     {nameSearch && (
                       <button
                         onClick={() => setNameSearch('')}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 filter-text"
                         aria-label="Clear name search"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,17 +153,14 @@ export default function PatientsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-auto relative">
-                  <label htmlFor="nameSearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    Apellido de Paciente
-                  </label>
-                  <div className="relative">
+                  <div className="relative input-group name">
                     <input
                       id="lastNameSearch"
                       type="text"
                       value={lastNameSearch}
                       onChange={(e) => setLastNameSearch(e.target.value)}
-                      placeholder="Buscar por apellido"
-                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="Apellido PX."
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 filter-text"
                     />
                     {lastNameSearch && (
                       <button
@@ -182,17 +176,14 @@ export default function PatientsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-auto relative">
-                  <label htmlFor="idNumberSearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    Número de Identificación
-                  </label>
-                  <div className="relative">
+                  <div className="relative input-group person">
                     <input
                       id="idNumberSearch"
                       type="text"
                       value={idNumberSearch}
                       onChange={(e) => setIdNumberSearch(e.target.value)}
-                      placeholder="Buscar por DNI"
-                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="DNI PX."
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 filter-text"
                     />
                     {idNumberSearch && (
                       <button
@@ -208,17 +199,14 @@ export default function PatientsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-auto relative">
-                  <label htmlFor="historySearch" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    Historia Clínica
-                  </label>
-                  <div className="relative">
+                  <div className="relative input-group clinical-history">
                     <input
                       id="historySearch"
                       type="text"
                       value={historySearch}
                       onChange={(e) => setHistorySearch(e.target.value)}
-                      placeholder="Número de HC"
-                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="Historia clínica"
+                      className="w-full sm:w-40 pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 filter-text"
                     />
                     {historySearch && (
                       <button
@@ -250,23 +238,21 @@ export default function PatientsPage() {
                 )}
                 <button 
                   onClick={handleFilter}
-                  className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors filter-button"
                   disabled={loading}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 filter-button-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
-                  Filtrar
                 </button>
                 <button 
                   onClick={handleAddPatient}
-                  className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors filter-button"
                   disabled={loading}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 filter-button-icon">
+                    <path fillRule="evenodd" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15"/>
                   </svg>
-                  Agregar
                 </button>
               </div>
             </div>
@@ -296,7 +282,7 @@ export default function PatientsPage() {
               
               <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 content-table">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -308,6 +294,7 @@ export default function PatientsPage() {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Historia Clínica
                         </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"/>
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -319,14 +306,41 @@ export default function PatientsPage() {
                             onClick={() => handleRowClick(patient.id_number)}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">{patient.full_name}</div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-white content-table-body-detail">
+                                <div className='content-table-body-label'>  
+                                  {patient.full_name}
+                                </div>  
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{patient.id_number}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400 content-table-body-detail">
+                                <div>
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 content-table-body-icon">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                  </svg>
+                                </div>
+                                <div className='content-table-body-label'>
+                                  {patient.id_number}
+                                </div>
+                              </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500 dark:text-gray-400 content-table-body-detail">
+                                <div>
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 content-table-body-icon">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                  </svg>
+                                </div>
+                                <div className='content-table-body-label'>
+                                  {patient.clinical_history}
+                                </div>
+                              </div>
+                            </td>
+                            <td className='px-6 py-4 whitespace-nowrap'>
                               <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {patient.clinical_history}
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 content-table-body-icon">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                </svg>
                               </div>
                             </td>
                           </tr>
