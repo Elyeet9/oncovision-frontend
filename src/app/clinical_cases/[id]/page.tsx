@@ -205,14 +205,14 @@ export default function ClinicalCaseDetail() {
     setProcessPreviewError(null);
     
     try {
-      const response = await fetch('http://127.0.0.1:8080/cases/update_images_status', {
+      const response = await fetch('http://127.0.0.1:8080/cases/medical_imaging', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           image_ids: selectedPreviewImages,
-          status: 'ready'
+          new_state: 'ready'
         }),
       });
       
@@ -233,6 +233,70 @@ export default function ClinicalCaseDetail() {
       setProcessPreviewError('Error al actualizar el estado de las imágenes. Por favor, inténtelo de nuevo.');
     } finally {
       setProcessingPreviewImages(false);
+    }
+  };
+
+  // Preview image deletion states
+  const [deletingPreviewImageId, setDeletingPreviewImageId] = useState<string | null>(null);
+  const [bulkPreviewDeleting, setBulkPreviewDeleting] = useState(false);
+
+  const handleDeletePreviewImage = async (imageId: string) => {
+    if (confirm('¿Está seguro que desea eliminar esta imagen?')) {
+      setDeletingPreviewImageId(imageId);
+      try {
+        const response = await fetch(`http://127.0.0.1:8080/cases/medical_imaging/${imageId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete image');
+        }
+
+        // Refresh case details after deletion
+        await fetchClinicalCaseDetails();
+        
+      } catch (err) {
+        console.error('Error deleting image:', err);
+        alert('Error al eliminar la imagen. Por favor, inténtelo de nuevo.');
+      } finally {
+        setDeletingPreviewImageId(null);
+      }
+    }
+  };
+
+  const handleBulkDeletePreviewImages = async () => {
+    if (selectedPreviewImages.length === 0) return;
+    
+    if (confirm(`¿Está seguro que desea eliminar ${selectedPreviewImages.length} ${selectedPreviewImages.length === 1 ? 'imagen' : 'imágenes'}?`)) {
+      setBulkPreviewDeleting(true);
+      try {
+        const response = await fetch('http://127.0.0.1:8080/cases/medical_imaging', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image_ids: selectedPreviewImages
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete images');
+        }
+        
+        // Clear selection and refresh case details
+        setSelectedPreviewImages([]);
+        await fetchClinicalCaseDetails();
+        
+      } catch (err) {
+        console.error('Error deleting images:', err);
+        alert('Error al eliminar las imágenes. Por favor, inténtelo de nuevo.');
+      } finally {
+        setBulkPreviewDeleting(false);
+      }
     }
   };
 
@@ -428,22 +492,43 @@ export default function ClinicalCaseDetail() {
                         `}
                       >
                         {/* Image preview */}
-                        <div className="relative w-full h-full p-2"> {/* Added p-2 for padding */}
+                        <div className="relative w-full h-full p-2">
+                          {/* Delete button - always visible */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent the click from selecting the image
+                              handleDeletePreviewImage(image.id);
+                            }}
+                            className="absolute top-4 right-4 z-20 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-sm transition-colors"
+                            title="Eliminar imagen"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                          {/* Loading indicator when deleting */}
+                          {deletingPreviewImageId === image.id && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+                              <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            </div>
+                          )}
+
                           <Image
-                            src={`http://localhost:8080/${image.full_image}`} 
+                            src={`http://localhost:8080/${image.full_image}`}
                             alt={`Medical Image ${image.id}`}
                             fill
                             sizes="(max-width: 640px) 100vw, 256px"
-                            className="w-full h-full object-cover rounded"
-                            style={{
-                              padding: '24px' // Additional padding inside the image
-                            }}
-                            priority={selectedPreviewImages.includes(image.id)} // Load selected images with priority
+                            className="object-cover rounded"
+                            style={{ padding: '24px' }}
+                            priority={selectedPreviewImages.includes(image.id)}
                           />
                           
-                          {/* Selection indicator */}
+                          {/* Selection indicator - moved to top-left to not overlap with delete button */}
                           {selectedPreviewImages.includes(image.id) && (
-                            <div className="absolute top-4 right-4 bg-blue-500 rounded-full p-1"> {/* Adjusted positioning */}
+                            <div className="absolute top-4 left-4 bg-blue-500 rounded-full p-1 z-10">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
@@ -484,7 +569,7 @@ export default function ClinicalCaseDetail() {
               )}
             </div>
             
-            {/* Selection info and process button */}
+            {/* Selection info and process/delete buttons */}
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-center">
               <div className="text-gray-600 mb-4 sm:mb-0">
                 {selectedPreviewImages.length === 0 ? (
@@ -495,23 +580,52 @@ export default function ClinicalCaseDetail() {
               </div>
               
               {selectedPreviewImages.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleProcessPreviewImages}
-                  disabled={processingPreviewImages}
-                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors
-                    ${processingPreviewImages ? 'opacity-75 cursor-not-allowed' : ''}`}
-                >
-                  {processingPreviewImages ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Procesando...
-                    </>
-                  ) : 'CARGAR'}
-                </button>
+                <div className="flex space-x-4">
+                  {/* Delete Button */}
+                  <button
+                    type="button"
+                    onClick={handleBulkDeletePreviewImages}
+                    disabled={bulkPreviewDeleting || processingPreviewImages}
+                    className={`px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors
+                      ${(bulkPreviewDeleting || processingPreviewImages) ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  >
+                    {bulkPreviewDeleting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Eliminando...
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        BORRAR
+                      </>
+                    )}
+                  </button>
+                  
+                  {/* Process Button */}
+                  <button
+                    type="button"
+                    onClick={handleProcessPreviewImages}
+                    disabled={processingPreviewImages || bulkPreviewDeleting}
+                    className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors
+                      ${(processingPreviewImages || bulkPreviewDeleting) ? 'opacity-75 cursor-not-allowed' : ''}`}
+                  >
+                    {processingPreviewImages ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Procesando...
+                      </>
+                    ) : 'CARGAR'}
+                  </button>
+                </div>
               )}
             </div>
             
@@ -529,6 +643,7 @@ export default function ClinicalCaseDetail() {
             )}
           </div>
         )}
+
         {/* Loaded images section */ }
 
         {/* Analized images section */ }
