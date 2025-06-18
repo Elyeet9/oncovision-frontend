@@ -14,6 +14,7 @@ interface LungNodule {
   y_position: number;
   width: number;
   height: number;
+  confidence: number;
 }
 
 interface MedicalImaging {
@@ -200,6 +201,55 @@ export default function ClinicalCaseDetail() {
   const [deletingLoadedImageId, setDeletingLoadedImageId] = useState<string | null>(null);
   const [bulkLoadedDeleting, setBulkLoadedDeleting] = useState(false);
 
+  // Analyzed images section
+  const [selectedAnalyzedImageId, setSelectedAnalyzedImageId] = useState<string | null>(null);
+  const [selectedAnalyzedImage, setSelectedAnalyzedImage] = useState<MedicalImaging | null>(null);
+
+  // Full screen image viewer state
+  const [isFullScreenActive, setIsFullScreenActive] = useState(false);
+  const [showHighlights, setShowHighlights] = useState(true);
+  const [fullScreenImageIndex, setFullScreenImageIndex] = useState(0);
+  const [analyzedImages, setAnalyzedImages] = useState<MedicalImaging[]>([]);
+
+  // useEffect to only consider images with 'analyzed' state
+  useEffect(() => {
+    if (selectedAnalyzedImageId && clinicalCase?.medical_images) {
+      const selectedImage = clinicalCase.medical_images.find(
+        img => img.id === selectedAnalyzedImageId && img.state === 'analyzed'
+      );
+      setSelectedAnalyzedImage(selectedImage || null);
+    } else {
+      setSelectedAnalyzedImage(null);
+    }
+  }, [selectedAnalyzedImageId, clinicalCase?.medical_images]);
+
+  // useEffect to update analyzed images when clinical case changes
+  useEffect(() => {
+    if (clinicalCase?.medical_images) {
+      const filtered = clinicalCase.medical_images.filter(img => img.state === 'analyzed');
+      setAnalyzedImages(filtered);
+      
+      // Update fullScreenImageIndex when selectedAnalyzedImageId changes
+      if (selectedAnalyzedImageId) {
+        const index = filtered.findIndex(img => img.id === selectedAnalyzedImageId);
+        if (index !== -1) {
+          setFullScreenImageIndex(index);
+        }
+      }
+    }
+  }, [clinicalCase?.medical_images, selectedAnalyzedImageId]);
+
+  // Modify the handleAnalyzedImageClick function to ensure we're only selecting analyzed images
+  const handleAnalyzedImageClick = (imageId: string) => {
+    // First check if the image has the correct state
+    if (clinicalCase?.medical_images) {
+      const image = clinicalCase.medical_images.find(img => img.id === imageId);
+      if (image && image.state === 'analyzed') {
+        setSelectedAnalyzedImageId(prevId => prevId === imageId ? null : imageId);
+      }
+    }
+  };
+
   // Function to handle image selection with a specific state
   const toggleImageSelection = (imageId: string, selectionState: 'preview' | 'ready', setSelectedFunc: React.Dispatch<React.SetStateAction<string[]>>) => {
     setSelectedFunc(prev => 
@@ -362,6 +412,55 @@ export default function ClinicalCaseDetail() {
   const handleBulkDeleteLoadedImages = () => {
     handleBulkDeleteImages(selectedLoadedImages, setBulkLoadedDeleting, setSelectedLoadedImages);
   };
+
+  // Add keyboard navigation support for full screen viewer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isFullScreenActive) return;
+      
+      switch (e.key) {
+        case 'Escape':
+          setIsFullScreenActive(false);
+          break;
+        case 'ArrowRight':
+          if (fullScreenImageIndex < analyzedImages.length - 1) {
+            setFullScreenImageIndex(fullScreenImageIndex + 1);
+            setSelectedAnalyzedImageId(analyzedImages[fullScreenImageIndex + 1].id);
+          }
+          break;
+        case 'ArrowLeft':
+          if (fullScreenImageIndex > 0) {
+            setFullScreenImageIndex(fullScreenImageIndex - 1);
+            setSelectedAnalyzedImageId(analyzedImages[fullScreenImageIndex - 1].id);
+          }
+          break;
+        case 'h':
+        case 'H':
+          setShowHighlights(!showHighlights);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFullScreenActive, fullScreenImageIndex, analyzedImages, showHighlights, setSelectedAnalyzedImageId]);
+
+  // Add this effect to disable body scrolling when full screen is active
+  useEffect(() => {
+    if (isFullScreenActive) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFullScreenActive]);
 
   return (
     <div className="pt-24 pb-10 px-4 md:px-8 min-h-screen bg-white">
@@ -905,7 +1004,400 @@ export default function ClinicalCaseDetail() {
           </div>
         )}
 
-        {/* Analized images section */ }
+        {/* Analyzed images section */}
+        {clinicalCase?.medical_images && clinicalCase.medical_images.some(img => img.state === 'analyzed') && (
+          <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm p-6" data-section="analyzed-images">
+            <h2 className="text-xl font-bold text-center text-gray-800 mb-6">IMÁGENES TOMOGRÁFICAS ANALIZADAS</h2>
+            {clinicalCase.medical_images.filter(img => img.state === 'analyzed').length > 0 ? (
+              <>
+                {/* Horizontal scrolling image gallery for analyzed images */}
+                <div className="relative">
+                  <div className="overflow-x-auto pb-4 hide-scrollbar">
+                    <div className="inline-flex space-x-4 min-w-full">
+                      {clinicalCase.medical_images
+                        .filter(img => img.state === 'analyzed')
+                        .map((image) => (
+                          <div 
+                            key={image.id}
+                            onClick={() => handleAnalyzedImageClick(image.id)}
+                            className={`
+                              flex-shrink-0 w-64 h-64 border-2 rounded-lg overflow-hidden cursor-pointer transition-all duration-200
+                              ${selectedAnalyzedImageId === image.id 
+                                ? 'border-blue-500 ring-2 ring-blue-300' 
+                                : 'border-gray-200 hover:border-gray-300'
+                              }
+                            `}
+                          >
+                            {/* Image preview with properly positioned dots for thumbnails */}
+                            <div className="relative w-full h-full p-2">
+                              <div className="relative w-full h-full flex items-center justify-center">
+                                <Image
+                                  src={`http://localhost:8080/${image.processed_image}`}
+                                  alt={`Analyzed Medical Image ${image.id}`}
+                                  fill
+                                  sizes="(max-width: 640px) 100vw, 256px"
+                                  className="object-contain"
+                                  style={{ padding: '12px' }}
+                                />
+                                
+                                {/* Overlay container that matches the actual image dimensions */}
+                                <div className="absolute" style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  maxWidth: 'calc(100% - 24px)',
+                                  maxHeight: 'calc(100% - 24px)',
+                                  position: 'absolute',
+                                  pointerEvents: 'none'
+                                }}>
+                                  {image.lung_nodules.map((nodule) => (
+                                    <div
+                                      key={nodule.id}
+                                      className="absolute w-3 h-3 bg-yellow-500 rounded-full border-2 border-white"
+                                      style={{
+                                        left: `${nodule.x_position * 100}%`,
+                                        top: `${nodule.y_position * 100}%`,
+                                        transform: 'translate(-50%, -50%)'
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                                
+                                {/* Other elements */}
+                                <div className="absolute top-4 right-4 bg-orange-500 text-white text-xs font-semibold rounded-full px-2 py-1 z-10">
+                                  {image.lung_nodules.length} {image.lung_nodules.length === 1 ? 'nódulo' : 'nódulos'}
+                                </div>
+                                
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-sm p-2 z-10">
+                                  {image.full_image.split('/').pop()}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  
+                  {/* Scroll indicators/buttons for analyzed images */}
+                  {clinicalCase.medical_images.filter(img => img.state === 'analyzed').length > 3 && (
+                    <>
+                      <button 
+                        className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full shadow-md hover:bg-opacity-100"
+                        onClick={() => {
+                          const currentSection = document.querySelector('[data-section="analyzed-images"]');
+                          const container = currentSection?.querySelector('.overflow-x-auto');
+                          if (container) container.scrollBy({ left: -200, behavior: 'smooth' });
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button 
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full shadow-md hover:bg-opacity-100"
+                        onClick={() => {
+                          const currentSection = document.querySelector('[data-section="analyzed-images"]');
+                          const container = currentSection?.querySelector('.overflow-x-auto');
+                          if (container) container.scrollBy({ left: 200, behavior: 'smooth' });
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+                
+                {/* Selection info */}
+                <div className="mt-2 text-sm text-gray-600 text-center">
+                  {selectedAnalyzedImageId ? 
+                    "Imagen seleccionada. Ver el reporte detallado a continuación." :
+                    "Seleccione una imagen para ver el reporte detallado."
+                  }
+                </div>
+              </>
+            ) : (
+              <div className="text-gray-500 text-center py-8">
+                No hay imágenes analizadas disponibles
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Detailed Report Section - Only shown when an image is selected */}
+        {selectedAnalyzedImage && (
+          <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-bold text-center text-gray-800 mb-6">REPORTE DE TOMOGRAFÍAS ANALIZADAS</h2>
+            
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex flex-col lg:flex-row">
+                {/* Left side - Full size image display */}
+                <div className="lg:w-1/2 mb-6 lg:mb-0 lg:pr-6">
+                  <div className="relative w-full aspect-square border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                    {/* Full size image */}
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={`http://localhost:8080/${selectedAnalyzedImage.processed_image}`}
+                        alt={`Full Medical Image Analysis`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-contain"
+                      />
+                      
+                      {/* Show nodule markers */}
+                      {selectedAnalyzedImage.lung_nodules.map((nodule) => (
+                        <div
+                          key={nodule.id}
+                          className="absolute w-4 h-4 bg-yellow-500/50 rounded-full border-2 border-white/50 shadow-md"
+                          style={{
+                            left: `${nodule.x_position * 100}%`,
+                            top: `${nodule.y_position * 100}%`,
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: 10
+                          }}
+                        >
+                          {/* Add a number label to match nodules in the list */}
+                          <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold text-white/50">
+                            {selectedAnalyzedImage.lung_nodules.indexOf(nodule) + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Image filename */}
+                    <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-sm p-2 rounded">
+                      {selectedAnalyzedImage.processed_image.split('/').pop()}
+                    </div>
+                  </div>
+                  
+                  {/* Image controls */}
+                  <div className="mt-4 flex justify-center space-x-4">
+                    <button 
+                      onClick={() => {
+                        setIsFullScreenActive(true);
+                        const index = analyzedImages.findIndex(img => img.id === selectedAnalyzedImage.id);
+                        if (index !== -1) {
+                          setFullScreenImageIndex(index);
+                        }
+                      }}
+                      className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                      </svg>
+                      Ver pantalla completa
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Right side - Nodules report */}
+                <div className="lg:w-1/2 lg:pl-6 lg:border-l lg:border-gray-200">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Nódulos detectados
+                  </h3>
+                  
+                  {selectedAnalyzedImage.lung_nodules.length > 0 ? (
+                    <ul className="space-y-4">
+                      {selectedAnalyzedImage.lung_nodules.map((nodule, index) => {
+                        // Convert confidence to percentage with 2 decimal places
+                        const confidencePercentage = (nodule.confidence * 100).toFixed(2);
+                        
+                        // Determine severity class based on malignancy type
+                        let severityClass = "bg-gray-100 border-gray-300";
+                        let textClass = "text-gray-800";
+                        
+                        if (nodule.malignancy_type.toLowerCase() === "benigno") {
+                          severityClass = "bg-green-50 border-green-200";
+                          textClass = "text-green-800";
+                        } else if (nodule.malignancy_type.toLowerCase() === "maligno") {
+                          severityClass = "bg-red-50 border-red-200";
+                          textClass = "text-red-800";
+                        } else if (nodule.malignancy_type.toLowerCase() === "sospechoso") {
+                          severityClass = "bg-yellow-50 border-yellow-200";
+                          textClass = "text-yellow-800";
+                        }
+                        
+                        return (
+                          <li 
+                            key={nodule.id} 
+                            className={`p-4 rounded-lg border ${severityClass} transition-all hover:shadow-md`}
+                          >
+                            <div className="flex items-center">
+                              {/* Numbered marker matching the image */}
+                              <div className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-yellow-500 text-white font-bold mr-3">
+                                {index + 1}
+                              </div>
+                              
+                              <div className="flex-1">
+                                <h4 className={`font-semibold ${textClass}`}>
+                                  Nódulo {index + 1}: {nodule.malignancy_type}
+                                </h4>
+                                
+                                <div className="mt-2">
+                                  <div className="flex items-center mb-1">
+                                    <span className="text-sm text-gray-600 mr-2">Confianza:</span>
+                                    <span className="text-sm font-semibold">{confidencePercentage}%</span>
+                                  </div>
+                                  
+                                  {/* Progress bar showing confidence */}
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className={`h-2 rounded-full ${
+                                        nodule.confidence < 0.5 ? "bg-green-500" :
+                                        nodule.confidence > 0.7 ? "bg-red-500" : 
+                                        "bg-yellow-500"
+                                      }`}
+                                      style={{ width: `${confidencePercentage}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                                
+                                {/* Dimensions information */}
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-gray-600">
+                                  <div>
+                                    <span className="font-medium">Posición:</span> 
+                                    <div className="text-xs mt-1">
+                                      X: {(nodule.x_position * 100).toFixed(1)}%<br />
+                                      Y: {(nodule.y_position * 100).toFixed(1)}%
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Dimensiones:</span> 
+                                    <div className="text-xs mt-1">
+                                      Ancho: {(nodule.width * 100).toFixed(1)}%<br />
+                                      Alto: {(nodule.height * 100).toFixed(1)}%
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <div className="text-center p-8 bg-gray-50 rounded-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="mt-2 text-gray-600">No se detectaron nódulos en esta imagen.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fullscreen image viewer */}
+        {isFullScreenActive && analyzedImages.length > 0 && (
+          <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative w-full h-full max-w-4xl max-h-4xl">
+                <Image
+                  src={`http://localhost:8080/${analyzedImages[fullScreenImageIndex].full_image}`}
+                  alt="Fullscreen medical image"
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                />
+                
+                {/* Show nodule markers in fullscreen if highlights are enabled */}
+                {showHighlights && analyzedImages[fullScreenImageIndex].lung_nodules.map((nodule) => (
+                  <div key={nodule.id}>
+                    {/* Rectangular bounding box for the nodule */}
+                    <div
+                      className="absolute border-1 border-yellow-500/80 bg-yellow-500/30 rounded-sm"
+                      style={{
+                        left: `${nodule.x_position * 100}%`,
+                        top: `${nodule.y_position * 100}%`,
+                        width: `${nodule.width * 1.4 * 100}%`,
+                        height: `${nodule.height * 1.4 * 100}%`,
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 10
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Fullscreen controls */}
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-6 text-white">
+              {/* Previous image button */}
+              <button 
+                onClick={() => {
+                  if (fullScreenImageIndex > 0) {
+                    setFullScreenImageIndex(fullScreenImageIndex - 1);
+                    setSelectedAnalyzedImageId(analyzedImages[fullScreenImageIndex - 1].id);
+                  }
+                }}
+                disabled={fullScreenImageIndex === 0}
+                className={`p-3 rounded-full bg-black/50 hover:bg-black/70 ${fullScreenImageIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              {/* Toggle highlights button */}
+              <button 
+                onClick={() => setShowHighlights(!showHighlights)}
+                className="p-3 rounded-full bg-black/50 hover:bg-black/70"
+              >
+                {showHighlights ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+              
+              {/* Close button */}
+              <button 
+                onClick={() => setIsFullScreenActive(false)}
+                className="p-3 rounded-full bg-black/50 hover:bg-black/70"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              {/* Next image button */}
+              <button 
+                onClick={() => {
+                  if (fullScreenImageIndex < analyzedImages.length - 1) {
+                    setFullScreenImageIndex(fullScreenImageIndex + 1);
+                    setSelectedAnalyzedImageId(analyzedImages[fullScreenImageIndex + 1].id);
+                  }
+                }}
+                disabled={fullScreenImageIndex === analyzedImages.length - 1}
+                className={`p-3 rounded-full bg-black/50 hover:bg-black/70 ${fullScreenImageIndex === analyzedImages.length - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Image counter */}
+            <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+              {fullScreenImageIndex + 1} / {analyzedImages.length}
+            </div>
+            
+            {/* Keyboard instructions */}
+            <div className="hidden absolute top-6 right-6 bg-black/50 text-white px-3 py-1 rounded-lg text-xs md:block">
+              <p>ESC: Salir | ←→: Navegar | H: Ocultar/mostrar nódulos</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
