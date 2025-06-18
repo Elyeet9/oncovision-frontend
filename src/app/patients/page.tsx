@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Navbar from "@/components/Navbar";
 import { useRouter } from 'next/navigation';
 
 // Define a type for patient data
@@ -120,7 +119,6 @@ export default function PatientsPage() {
 
   return (
     <>
-      <Navbar />
       <div className="pt-24 pb-10 px-4 md:px-8 min-h-screen bg-gray-50 dark:bg-gray-900 main">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">Pacientes</h1>
