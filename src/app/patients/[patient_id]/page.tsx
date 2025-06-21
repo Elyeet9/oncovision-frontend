@@ -137,7 +137,7 @@ export default function PatientDetail() {
             ) : patient ? (
               <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between">
                 {/* Patient Name and Details */}
-                <div className="text-center sm:text-left flex-grow px-4">
+                <div className="flex flex-col sm:flex-row sm:space-x-6 text-gray-600 mt-1">
                   <h1 className="text-2xl font-bold text-gray-800">
                     {patient.full_name}
                   </h1>
@@ -180,7 +180,7 @@ export default function PatientDetail() {
               <p>{casesError}</p>
             </div>
           ) : (
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
               {clinicalCases.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200 content-table">
@@ -195,7 +195,7 @@ export default function PatientDetail() {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Nódulos
                         </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"/>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
