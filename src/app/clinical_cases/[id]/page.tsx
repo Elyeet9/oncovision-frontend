@@ -1296,13 +1296,14 @@ export default function ClinicalCaseDetail() {
         {isFullScreenActive && analyzedImages.length > 0 && (
           <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative w-full h-full max-w-4xl max-h-4xl">
+              <div className="relative max-w-full max-h-full aspect-square">
                 <Image
                   src={`http://localhost:8080/${analyzedImages[fullScreenImageIndex].full_image}`}
                   alt="Fullscreen medical image"
-                  fill
-                  sizes="100vw"
-                  className="object-contain"
+                  width={2000}
+                  height={2000}
+                  className="object-contain max-w-full max-h-full"
+                  priority
                 />
                 
                 {/* Show nodule markers in fullscreen if highlights are enabled */}
