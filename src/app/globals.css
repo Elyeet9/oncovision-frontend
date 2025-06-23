@@ -110,23 +110,6 @@ body {
   background-color: lightgray;
 }
 
-.content-table-body-detail {
-  display: flex;
-}
-
-.content-table-body-detail div {
-  flex: 1;
-}
-
-.content-table-body-icon {
-  stroke-width: 1.0;
-  color: #000000;
-}
-
-.content-table-body-label {
-  color: #000000;
-}
-
 .input-group {
   position: relative;
 }
