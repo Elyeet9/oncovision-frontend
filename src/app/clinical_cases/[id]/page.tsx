@@ -736,6 +736,30 @@ export default function ClinicalCaseDetail() {
                 </>
               )}
             </div>
+
+            {/* Checkbox to select all preview images */}
+            <div className="mt-4 flex items-center">
+              <label className="flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedPreviewImages.length === clinicalCase.medical_images.filter(img => img.state === 'preview').length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      // Select all preview images
+                      const allPreviewIds = clinicalCase.medical_images
+                        .filter(img => img.state === 'preview')
+                        .map(img => img.id);
+                      setSelectedPreviewImages(allPreviewIds);
+                    } else {
+                      // Deselect all preview images
+                      setSelectedPreviewImages([]);
+                    }
+                  }}
+                  className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">Seleccionar todas las imágenes</span>
+              </label>
+            </div>
             
             {/* Selection info and process/delete buttons */}
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-center">
@@ -921,7 +945,31 @@ export default function ClinicalCaseDetail() {
                 </>
               )}
             </div>
-            
+
+            {/* Checkbox to select all loaded images */}
+            <div className="mt-4 flex items-center">
+              <label className="flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedLoadedImages.length === clinicalCase.medical_images.filter(img => img.state === 'ready').length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      // Select all loaded images
+                      const allLoadedIds = clinicalCase.medical_images
+                        .filter(img => img.state === 'ready')
+                        .map(img => img.id);
+                      setSelectedLoadedImages(allLoadedIds);
+                    } else {
+                      // Deselect all loaded images
+                      setSelectedLoadedImages([]);
+                    }
+                  }}
+                  className="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">Seleccionar todas las imágenes</span>
+              </label>
+            </div>
+
             {/* Selection info and process/delete buttons */}
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-center">
               <div className="text-gray-600 mb-4 sm:mb-0">
