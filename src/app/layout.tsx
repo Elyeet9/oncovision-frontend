@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto_Slab } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "react-hot-toast";
 
 const robotoSlab = Roboto_Slab({
   variable: "--font-roboto-slab",
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body>
         <Navbar />
         {children}
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

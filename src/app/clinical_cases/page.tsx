@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 // Define a type for your clinical case
 interface ClinicalCase {
@@ -65,6 +66,7 @@ export default function ClinicalCases() {
   };
 
   const handleAddCase = async () => {
+    const loadingToast = toast.loading('Creando caso clínico...');
     try {
       setLoading(true);
       const response = await fetch('http://127.0.0.1:8080/cases/clinical_case', {
@@ -89,10 +91,12 @@ export default function ClinicalCases() {
       setPatientIdSearch('');
       
       // Show success message
-      alert('Caso clínico creado exitosamente');
+      toast.dismiss(loadingToast);
+      toast.success('Caso creado correctamente');
     } catch (err) {
       console.error('Error creating clinical case:', err);
-      alert('Error al crear el caso clínico. Por favor, inténtelo de nuevo.');
+      toast.dismiss(loadingToast);
+      toast.error('Error al crear el caso clínico. Por favor, inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 // Define a type for patient data
 interface Patient {
@@ -69,6 +70,7 @@ export default function PatientsPage() {
   };
 
   const handleAddPatient = async () => {
+    const loadingToast = toast.loading('Registrando paciente...');
     try {
       setLoading(true);
       const response = await fetch('http://127.0.0.1:8080/patients/patient_create', {
@@ -95,10 +97,12 @@ export default function PatientsPage() {
       resetSearch();
       
       // Show success message
-      alert('Caso clínico creado exitosamente');
+      toast.dismiss(loadingToast);
+      toast.success('Paciente registrado correctamente');
     } catch (err) {
       console.error('Error creating clinical case:', err);
-      alert('Error al crear el caso clínico. Por favor, inténtelo de nuevo. ' + err);
+      toast.dismiss(loadingToast);
+      toast.error('Error al registrar paciente. Por favor, intenta nuevamente.');
     } finally {
       setLoading(false);
     }

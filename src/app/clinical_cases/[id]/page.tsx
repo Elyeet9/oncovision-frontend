@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, ChangeEvent, DragEvent } from
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 
 interface LungNodule {
@@ -65,6 +65,7 @@ export default function ClinicalCaseDetail() {
     } catch (err) {
       console.error('Error fetching case details:', err);
       setError('Could not load case details. Please try again later.');
+      toast.error('Error al cargar los detalles del caso');
     } finally {
       setLoading(false);
     }
@@ -153,6 +154,7 @@ export default function ClinicalCaseDetail() {
   const handleUpload = async () => {
     if (files.length === 0) return;
     
+    const loadingToast = toast.loading('Subiendo imágenes...');
     setUploading(true);
     setUploadError(null);
     
@@ -178,9 +180,13 @@ export default function ClinicalCaseDetail() {
       // Refresh case details after successful upload
       fetchClinicalCaseDetails();
       
+      toast.dismiss(loadingToast);
+      toast.success('Imágenes cargadas correctamente');
     } catch (err) {
       console.error('Error uploading files:', err);
       setUploadError('Error al cargar las imágenes. Por favor, inténtelo de nuevo.');
+      toast.dismiss(loadingToast);
+      toast.error('Error al subir las imágenes');
     } finally {
       setUploading(false);
     }
@@ -270,7 +276,10 @@ export default function ClinicalCaseDetail() {
     setSelectedFunc: React.Dispatch<React.SetStateAction<string[]>>
   ) => {
     if (imageIds.length === 0) return;
-    
+      
+    const actionText = newState === 'ready' ? 'cargando' : 'analizando';
+    const loadingToast = toast.loading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} imágenes...`);
+  
     setProcessingFunc(true);
     setErrorFunc(null);
     
@@ -296,11 +305,16 @@ export default function ClinicalCaseDetail() {
       // Refresh case details to show updated statuses
       await fetchClinicalCaseDetails();
       
+      toast.dismiss(loadingToast);
+      toast.success(`Imágenes ${actionText}s correctamente`);
+    
       // Auto-hide success message after 5 seconds
       setTimeout(() => setSuccessFunc(false), 5000);
     } catch (err) {
       console.error(`Error updating image status to ${newState}:`, err);
       setErrorFunc(`Error al actualizar el estado de las imágenes. Por favor, inténtelo de nuevo.`);
+      toast.dismiss(loadingToast);
+      toast.error(`Error al ${actionText} las imágenes`);
     } finally {
       setProcessingFunc(false);
     }
@@ -312,6 +326,7 @@ export default function ClinicalCaseDetail() {
     setDeletingFunc: React.Dispatch<React.SetStateAction<string | null>>
   ) => {
     if (confirm('¿Está seguro que desea eliminar esta imagen?')) {
+      const loadingToast = toast.loading('Eliminando imagen...');
       setDeletingFunc(imageId);
       try {
         const response = await fetch(`http://127.0.0.1:8080/cases/medical_imaging/${imageId}`, {
@@ -327,10 +342,13 @@ export default function ClinicalCaseDetail() {
 
         // Refresh case details after deletion
         await fetchClinicalCaseDetails();
+        toast.dismiss(loadingToast);
+        toast.success('Imagen eliminada correctamente');
         
       } catch (err) {
         console.error('Error deleting image:', err);
-        alert('Error al eliminar la imagen. Por favor, inténtelo de nuevo.');
+        toast.dismiss(loadingToast);
+        toast.error('Error al eliminar la imagen');
       } finally {
         setDeletingFunc(null);
       }
@@ -346,6 +364,7 @@ export default function ClinicalCaseDetail() {
     if (imageIds.length === 0) return;
     
     if (confirm(`¿Está seguro que desea eliminar ${imageIds.length} ${imageIds.length === 1 ? 'imagen' : 'imágenes'}?`)) {
+      const loadingToast = toast.loading('Eliminando imágenes...');
       setBulkDeletingFunc(true);
       try {
         const response = await fetch('http://127.0.0.1:8080/cases/medical_imaging', {
@@ -365,10 +384,12 @@ export default function ClinicalCaseDetail() {
         // Clear selection and refresh case details
         setSelectedFunc([]);
         await fetchClinicalCaseDetails();
-        
-      } catch (err) {
+        toast.dismiss(loadingToast);
+        toast.success(`${imageIds.length} ${imageIds.length === 1 ? 'imagen eliminada' : 'imágenes eliminadas'} correctamente`);
+    } catch (err) {
         console.error('Error deleting images:', err);
-        alert('Error al eliminar las imágenes. Por favor, inténtelo de nuevo.');
+        toast.dismiss(loadingToast);
+        toast.error('Error al eliminar las imágenes');
       } finally {
         setBulkDeletingFunc(false);
       }
@@ -510,7 +531,6 @@ export default function ClinicalCaseDetail() {
 
   return (
     <div className="pt-24 pb-10 px-4 md:px-8 min-h-screen bg-white">
-      <Toaster position="bottom-right" />
       <div className="max-w-6xl mx-auto">
         {/* Top Bar with Patient Information */}
         <div className="mb-8 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
