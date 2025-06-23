@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, ChangeEvent, DragEvent } from
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import toast, { Toaster } from 'react-hot-toast';
 
 
 interface LungNodule {
@@ -461,9 +462,55 @@ export default function ClinicalCaseDetail() {
       document.body.style.overflow = '';
     };
   }, [isFullScreenActive]);
+  
+  const generatePDF = async () => {
+    if (!selectedAnalyzedImage || !clinicalCase?.id) return;
+    
+    // Show loading state
+    const loadingToast = toast.loading('Generando PDF...');
+    
+    try {
+      // Call backend API to generate PDF
+      const response = await fetch(`http://127.0.0.1:8080/cases/generate_pdf/${clinicalCase.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al generar el PDF');
+      }
+      
+      // Get the PDF as a blob
+      const pdfBlob = await response.blob();
+      
+      // Create a URL for the blob
+      const blobUrl = window.URL.createObjectURL(pdfBlob);
+      
+      // Create an invisible link to trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `reporte_tomografia_caso_${clinicalCase.id}_${selectedAnalyzedImage.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL object
+      window.URL.revokeObjectURL(blobUrl);
+      
+      toast.dismiss(loadingToast);
+      toast.success('PDF generado con éxito');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.dismiss(loadingToast);
+      toast.error('Error al generar el PDF. Por favor, inténtelo de nuevo.');
+    }
+  };
 
   return (
     <div className="pt-24 pb-10 px-4 md:px-8 min-h-screen bg-white">
+      <Toaster position="bottom-right" />
       <div className="max-w-6xl mx-auto">
         {/* Top Bar with Patient Information */}
         <div className="mb-8 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
@@ -1335,6 +1382,17 @@ export default function ClinicalCaseDetail() {
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <button 
+                  onClick={generatePDF}
+                  className="flex items-center px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Generar PDF
+                </button>
               </div>
             </div>
           </div>
