@@ -637,7 +637,7 @@ export default function ClinicalCaseDetail() {
             
             {/* Horizontal scrolling image gallery */}
             <div className="relative">
-              <div className="overflow-x-auto pb-4 hide-scrollbar">
+              <div className="overflow-x-auto pb-4 sd:hide-scrollbar">
                 <div className="inline-flex space-x-4 min-w-full">
                   {clinicalCase.medical_images
                     .filter(img => img.state === 'preview')
@@ -843,7 +843,7 @@ export default function ClinicalCaseDetail() {
             
             {/* Horizontal scrolling image gallery */}
             <div className="relative">
-              <div className="overflow-x-auto pb-4 hide-scrollbar">
+              <div className="overflow-x-auto pb-4 sd:hide-scrollbar">
                 <div className="inline-flex space-x-4 min-w-full">
                   {clinicalCase.medical_images
                     .filter(img => img.state === 'ready')
@@ -1060,7 +1060,7 @@ export default function ClinicalCaseDetail() {
               <>
                 {/* Horizontal scrolling image gallery for analyzed images */}
                 <div className="relative">
-                  <div className="overflow-x-auto pb-4 hide-scrollbar">
+                  <div className="overflow-x-auto pb-4 sd:hide-scrollbar">
                     <div className="inline-flex space-x-4 min-w-full">
                       {clinicalCase.medical_images
                         .filter(img => img.state === 'analyzed')
