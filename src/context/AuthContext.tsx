@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Define types
@@ -28,17 +28,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Define logout as useCallback to prevent unnecessary re-creations
+  const logout = useCallback(() => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    setUser(null);
+    router.push('/auth/login');
+  }, [router]); // router is the only dependency
+
   // Check for existing auth on component mount
   useEffect(() => {
-    // Check if access token exists in local storage
-    const token = localStorage.getItem('accessToken');
-    const username = localStorage.getItem('username');
-    
-    if (token && username) {
-      setUser(username);
+    try {
+      // Check if access token exists in local storage
+      const token = localStorage.getItem('accessToken');
+      const username = localStorage.getItem('username');
+      
+      if (token && username) {
+        setUser(username);
+      }
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   }, []);
 
   // Set up token refresh
@@ -47,10 +60,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     // Function to refresh token
     const refreshToken = async () => {
-      const refresh = localStorage.getItem('refreshToken');
-      if (!refresh) return;
-      
       try {
+        const refresh = localStorage.getItem('refreshToken');
+        if (!refresh) return;
+        
         const response = await fetch('http://127.0.0.1:8080/api/token/refresh/', {
           method: 'POST',
           headers: {
@@ -80,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     // Clean up interval
     return () => clearInterval(intervalId);
-  }, [user]);
+  }, [user, logout]); // Added logout as a dependency
 
   // Login function
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -110,15 +123,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Login error:', error);
       return false;
     }
-  };
-
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('username');
-    setUser(null);
-    router.push('/auth/login');
   };
 
   // Context value

@@ -250,7 +250,7 @@ export default function ClinicalCases() {
                         clinicalCases.map((clinicalCase) => (
                           <tr 
                             key={clinicalCase.id} 
-                            className="hover:bg-gray-50 cursor-pointer"
+                            className="hover:bg-gray-50 cursor-pointer transition-colors"
                             onClick={() => handleRowClick(clinicalCase.id)}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">

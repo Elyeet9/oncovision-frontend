@@ -300,7 +300,7 @@ export default function PatientsPage() {
                         patients.map((patient) => (
                           <tr 
                             key={patient.id_number} 
-                            className="hover:bg-gray-50 cursor-pointer"
+                            className="hover:bg-gray-50 cursor-pointer transition-colors"
                             onClick={() => handleRowClick(patient.id_number)}
                           >
                             <td className="px-6 py-4 whitespace-nowrap">

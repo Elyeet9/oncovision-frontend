@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -10,9 +10,19 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isClient, setIsClient] = useState(false);
   
   const router = useRouter();
   const { login } = useAuth();
+
+  // Use useEffect to check authentication on client-side only
+  useEffect(() => {
+    setIsClient(true);
+    // Check if user is already authenticated
+    if (localStorage.getItem('accessToken')) {
+      router.push('/');
+    }
+  }, [router]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +34,7 @@ export default function Login() {
       
       if (success) {
         toast.success('Inicio de sesión exitoso');
-        router.push('/clinical_cases');
+        router.push('/');
       } else {
         throw new Error('Credenciales incorrectas');
       }
@@ -37,8 +47,17 @@ export default function Login() {
     }
   };
   
+  // If we haven't confirmed we're on the client yet, don't render form
+  if (!isClient) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="w-16 h-16 border-t-4 border-[#00b2ca] border-solid rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white p-4">
+    <div className="flex items-center justify-center min-h-screen bg-white dark:bg-white p-4">
       <div className="w-full max-w-md">
         <div className="bg-[#00b2ca] rounded-lg shadow-lg overflow-hidden">
           <div className="px-10 pt-10 pb-8 text-center">
@@ -49,6 +68,7 @@ export default function Login() {
             <div className="border-t border-white my-6"></div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Form content remains the same */}
               <div>
                 <div className="relative">
                   <input
