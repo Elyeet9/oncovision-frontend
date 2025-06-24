@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import fetchWithAuth from '@/utils/fetchWithAuth';
 
 
 interface LungNodule {
@@ -49,11 +50,8 @@ export default function ClinicalCaseDetail() {
       setLoading(true);
       
       // API call to fetch case details
-      const response = await fetch(`http://127.0.0.1:8080/cases/clinical_case_detail/${id}`, {
+      const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/clinical_case_detail/${id}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!response.ok) {
@@ -165,7 +163,7 @@ export default function ClinicalCaseDetail() {
       });
       formData.append('case_id', id as string);
       
-      const response = await fetch('http://127.0.0.1:8080/cases/upload_images', {
+      const response = await fetchWithAuth('http://127.0.0.1:8080/cases/upload_images', {
         method: 'POST',
         body: formData,
       });
@@ -284,11 +282,8 @@ export default function ClinicalCaseDetail() {
     setErrorFunc(null);
     
     try {
-      const response = await fetch('http://127.0.0.1:8080/cases/medical_imaging', {
+      const response = await fetchWithAuth('http://127.0.0.1:8080/cases/medical_imaging', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           image_ids: imageIds,
           new_state: newState
@@ -329,11 +324,8 @@ export default function ClinicalCaseDetail() {
       const loadingToast = toast.loading('Eliminando imagen...');
       setDeletingFunc(imageId);
       try {
-        const response = await fetch(`http://127.0.0.1:8080/cases/medical_imaging/${imageId}`, {
+        const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/medical_imaging/${imageId}`, {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
 
         if (!response.ok) {
@@ -367,11 +359,8 @@ export default function ClinicalCaseDetail() {
       const loadingToast = toast.loading('Eliminando imágenes...');
       setBulkDeletingFunc(true);
       try {
-        const response = await fetch('http://127.0.0.1:8080/cases/medical_imaging', {
+        const response = await fetchWithAuth('http://127.0.0.1:8080/cases/medical_imaging', {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             image_ids: imageIds
           }),
@@ -492,11 +481,8 @@ export default function ClinicalCaseDetail() {
     
     try {
       // Call backend API to generate PDF
-      const response = await fetch(`http://127.0.0.1:8080/cases/generate_pdf/${clinicalCase.id}`, {
+      const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/generate_pdf/${clinicalCase.id}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
       
       if (!response.ok) {

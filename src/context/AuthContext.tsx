@@ -1,0 +1,138 @@
+'use client';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+// Define types
+interface AuthContextType {
+  isAuthenticated: boolean;
+  user: string | null;
+  login: (username: string, password: string) => Promise<boolean>;
+  logout: () => void;
+  loading: boolean;
+}
+
+// Create context
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Custom hook to use auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // Check for existing auth on component mount
+  useEffect(() => {
+    // Check if access token exists in local storage
+    const token = localStorage.getItem('accessToken');
+    const username = localStorage.getItem('username');
+    
+    if (token && username) {
+      setUser(username);
+    }
+    
+    setLoading(false);
+  }, []);
+
+  // Set up token refresh
+  useEffect(() => {
+    if (!user) return;
+    
+    // Function to refresh token
+    const refreshToken = async () => {
+      const refresh = localStorage.getItem('refreshToken');
+      if (!refresh) return;
+      
+      try {
+        const response = await fetch('http://127.0.0.1:8080/api/token/refresh/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ refresh }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('accessToken', data.access);
+          return true;
+        } else {
+          // If refresh fails, log out
+          logout();
+          return false;
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        logout();
+        return false;
+      }
+    };
+    
+    // Set up interval to refresh token (every 4 minutes if token expires in 5)
+    const intervalId = setInterval(refreshToken, 4 * 60 * 1000);
+    
+    // Clean up interval
+    return () => clearInterval(intervalId);
+  }, [user]);
+
+  // Login function
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('http://127.0.0.1:8080/api/token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      if (!response.ok) {
+        return false;
+      }
+      
+      const data = await response.json();
+      
+      // Store tokens and user info
+      localStorage.setItem('accessToken', data.access);
+      localStorage.setItem('refreshToken', data.refresh);
+      localStorage.setItem('username', username);
+      
+      setUser(username);
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('username');
+    setUser(null);
+    router.push('/auth/login');
+  };
+
+  // Context value
+  const value = {
+    isAuthenticated: !!user,
+    user,
+    login,
+    logout,
+    loading,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

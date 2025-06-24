@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import fetchWithAuth from '@/utils/fetchWithAuth';
 
 // Define a type for your clinical case
 interface ClinicalCase {
@@ -43,13 +44,7 @@ export default function ClinicalCases() {
         url += `?${params.toString()}`;
       }
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add any authentication headers if needed
-        },
-      });
+      const response = await fetchWithAuth(url, {method: 'GET'});
       
       if (!response.ok) {
         throw new Error('Failed to fetch clinical cases');

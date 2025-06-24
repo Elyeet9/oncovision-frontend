@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import fetchWithAuth from '@/utils/fetchWithAuth';
 
 // Define a type for patient data
 interface Patient {
@@ -48,12 +49,7 @@ export default function PatientsPage() {
         url += `?${params.toString()}`;
       }
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetchWithAuth(url, {method: 'GET',});
       
       if (!response.ok) {
         throw new Error('Failed to fetch patients');

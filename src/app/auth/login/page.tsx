@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -12,6 +12,7 @@ export default function Login() {
   const [error, setError] = useState('');
   
   const router = useRouter();
+  const { login } = useAuth();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,8 +20,14 @@ export default function Login() {
     setError('');
     
     try {
-      toast.success('Inicio de sesión exitoso');
-      router.push('/clinical_cases');
+      const success = await login(username, password);
+      
+      if (success) {
+        toast.success('Inicio de sesión exitoso');
+        router.push('/clinical_cases');
+      } else {
+        throw new Error('Credenciales incorrectas');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError('Error al iniciar sesión. Por favor, inténtelo de nuevo.');
@@ -45,11 +52,11 @@ export default function Login() {
               <div>
                 <div className="relative">
                   <input
-                    type="text" // Changed from email to text
-                    id="username" // Changed from email to username
-                    value={username} // Keep the state variable name for now
-                    onChange={(e) => setUsername(e.target.value)} 
-                    placeholder="Usuario" // Changed from Correo electrónico to Usuario
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Usuario"
                     className="w-full pl-4 pr-10 py-3 bg-white/10 text-white placeholder-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/20 border border-white"
                     required
                   />
@@ -93,7 +100,7 @@ export default function Login() {
               >
                 {loading ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#00b2ca]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#00b2ca]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -103,34 +110,8 @@ export default function Login() {
                   'INGRESAR'
                 )}
               </button>
-              
-              <div className="text-center">
-                <Link href="/auth/forgot-password" className="text-sm text-white hover:underline">
-                  ¿Olvidó la contraseña?
-                </Link>
-              </div>
             </form>
-            
-            <div className="border-t border-white my-6"></div>
-            
-            <div className="text-center">
-              <Link 
-                href="/auth/register" 
-                className="inline-block bg-transparent border border-white text-white font-medium py-2 px-6 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                Crear nueva cuenta
-              </Link>
-            </div>
           </div>
-        </div>
-        
-        <div className="text-center mt-8">
-          <Link href="/" className="text-gray-600 hover:text-gray-800 text-sm flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Volver al inicio
-          </Link>
         </div>
       </div>
     </div>

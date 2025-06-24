@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import fetchWithAuth from '@/utils/fetchWithAuth';
 
 // Define the Patient interface
 interface Patient {
@@ -37,11 +38,8 @@ export default function PatientDetail() {
         setLoading(true);
         
         // API call to fetch patient details
-        const response = await fetch(`http://127.0.0.1:8080/patients/patient_detail/${patient_id}`, {
+        const response = await fetchWithAuth(`http://127.0.0.1:8080/patients/patient_detail/${patient_id}`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
 
         if (!response.ok) {
@@ -70,11 +68,8 @@ export default function PatientDetail() {
         setCasesLoading(true);
         
         // API call to fetch clinical cases for the patient
-        const response = await fetch(`http://127.0.0.1:8080/cases/clinical_case_list?patient_id=${patient_id}`, {
+        const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/clinical_case_list?patient_id=${patient_id}`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
         });
 
         if (!response.ok) {
