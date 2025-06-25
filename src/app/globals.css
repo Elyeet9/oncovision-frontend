@@ -8,8 +8,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-roboto-slab);
+  --font-mono: var(--font-roboto-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +22,6 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 .navbar-custom {
@@ -111,23 +110,6 @@ body {
   background-color: lightgray;
 }
 
-.content-table-body-detail {
-  display: flex;
-}
-
-.content-table-body-detail div {
-  flex: 1;
-}
-
-.content-table-body-icon {
-  stroke-width: 1.0;
-  color: #000000;
-}
-
-.content-table-body-label {
-  color: #000000;
-}
-
 .input-group {
   position: relative;
 }
@@ -164,4 +146,13 @@ body {
 
 .input-group input {
   padding-left: 35px; /* Adjust based on the width of the icon */
+}
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
