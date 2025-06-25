@@ -64,11 +64,8 @@ export default function ClinicalCases() {
     const loadingToast = toast.loading('Creando caso clínico...');
     try {
       setLoading(true);
-      const response = await fetch('http://127.0.0.1:8080/cases/clinical_case', {
+      const response = await fetchWithAuth('http://127.0.0.1:8080/cases/clinical_case', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           patient_id: patientIdSearch,
         }),

@@ -69,11 +69,8 @@ export default function PatientsPage() {
     const loadingToast = toast.loading('Registrando paciente...');
     try {
       setLoading(true);
-      const response = await fetch('http://127.0.0.1:8080/patients/patient_create', {
+      const response = await fetchWithAuth('http://127.0.0.1:8080/patients/patient_create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           names: nameSearch,
           last_names: lastNameSearch,
