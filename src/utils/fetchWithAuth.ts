@@ -2,6 +2,7 @@
  * Utility function for making authenticated fetch requests
  * with support for JSON and FormData
  */
+import { API_URL } from '@/utils/config';
 export default async function fetchWithAuth(
   url: string, 
   options: RequestInit = {}
@@ -33,7 +34,7 @@ export default async function fetchWithAuth(
     if (refreshToken) {
       try {
         // Try to get a new access token
-        const refreshResponse = await fetch('http://127.0.0.1:8080/api/token/refresh/', {
+        const refreshResponse = await fetch(`${API_URL}/api/token/refresh/'`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh: refreshToken })

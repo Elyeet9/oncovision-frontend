@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import fetchWithAuth from '@/utils/fetchWithAuth';
+import { API_URL } from '@/utils/config';
 
 
 interface LungNodule {
@@ -50,7 +51,7 @@ export default function ClinicalCaseDetail() {
       setLoading(true);
       
       // API call to fetch case details
-      const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/clinical_case_detail/${id}`, {
+      const response = await fetchWithAuth(`${API_URL}/cases/clinical_case_detail/${id}`, {
         method: 'GET',
       });
 
@@ -163,7 +164,7 @@ export default function ClinicalCaseDetail() {
       });
       formData.append('case_id', id as string);
       
-      const response = await fetchWithAuth('http://127.0.0.1:8080/cases/upload_images', {
+      const response = await fetchWithAuth(`${API_URL}/cases/upload_images`, {
         method: 'POST',
         body: formData,
       });
@@ -282,7 +283,7 @@ export default function ClinicalCaseDetail() {
     setErrorFunc(null);
     
     try {
-      const response = await fetchWithAuth('http://127.0.0.1:8080/cases/medical_imaging', {
+      const response = await fetchWithAuth(`${API_URL}/cases/medical_imaging`, {
         method: 'PUT',
         body: JSON.stringify({
           image_ids: imageIds,
@@ -324,7 +325,7 @@ export default function ClinicalCaseDetail() {
       const loadingToast = toast.loading('Eliminando imagen...');
       setDeletingFunc(imageId);
       try {
-        const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/medical_imaging/${imageId}`, {
+        const response = await fetchWithAuth(`${API_URL}/cases/medical_imaging/${imageId}`, {
           method: 'DELETE',
         });
 
@@ -359,7 +360,7 @@ export default function ClinicalCaseDetail() {
       const loadingToast = toast.loading('Eliminando imágenes...');
       setBulkDeletingFunc(true);
       try {
-        const response = await fetchWithAuth('http://127.0.0.1:8080/cases/medical_imaging', {
+        const response = await fetchWithAuth(`${API_URL}/cases/medical_imaging`, {
           method: 'DELETE',
           body: JSON.stringify({
             image_ids: imageIds
@@ -481,7 +482,7 @@ export default function ClinicalCaseDetail() {
     
     try {
       // Call backend API to generate PDF
-      const response = await fetchWithAuth(`http://127.0.0.1:8080/cases/generate_pdf/${clinicalCase.id}`, {
+      const response = await fetchWithAuth(`${API_URL}/cases/generate_pdf/${clinicalCase.id}`, {
         method: 'GET',
       });
       
@@ -732,7 +733,7 @@ export default function ClinicalCaseDetail() {
                           )}
 
                           <Image
-                            src={`http://localhost:8080/${image.full_image}`}
+                            src={`${API_URL}/${image.full_image}`}
                             alt={`Medical Image ${image.id}`}
                             fill
                             sizes="(max-width: 640px) 100vw, 256px"
@@ -938,7 +939,7 @@ export default function ClinicalCaseDetail() {
                           )}
 
                           <Image
-                            src={`http://localhost:8080/${image.processed_image}`}
+                            src={`${API_URL}/${image.processed_image}`}
                             alt={`Medical Image ${image.id}`}
                             fill
                             sizes="(max-width: 640px) 100vw, 256px"
@@ -1133,7 +1134,7 @@ export default function ClinicalCaseDetail() {
                             <div className="relative w-full h-full p-2">
                               <div className="relative w-full h-full flex items-center justify-center">
                                 <Image
-                                  src={`http://localhost:8080/${image.processed_image}`}
+                                  src={`${API_URL}/${image.processed_image}`}
                                   alt={`Analyzed Medical Image ${image.id}`}
                                   fill
                                   sizes="(max-width: 640px) 100vw, 256px"
@@ -1238,7 +1239,7 @@ export default function ClinicalCaseDetail() {
                     {/* Full size image */}
                     <div className="relative w-full h-full">
                       <Image
-                        src={`http://localhost:8080/${selectedAnalyzedImage.processed_image}`}
+                        src={`${API_URL}/${selectedAnalyzedImage.processed_image}`}
                         alt={`Full Medical Image Analysis`}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
@@ -1410,7 +1411,7 @@ export default function ClinicalCaseDetail() {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative max-w-full max-h-full aspect-square">
                 <Image
-                  src={`http://localhost:8080/${analyzedImages[fullScreenImageIndex].full_image}`}
+                  src={`${API_URL}/${analyzedImages[fullScreenImageIndex].full_image}`}
                   alt="Fullscreen medical image"
                   width={2000}
                   height={2000}
