@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import fetchWithAuth from '@/utils/fetchWithAuth';
+import { API_URL } from '@/utils/config';
 
 // Define a type for your clinical case
 interface ClinicalCase {
@@ -33,7 +34,7 @@ export default function ClinicalCases() {
   const fetchClinicalCases = async (caseId = '', patientId = '') => {
     try {
       setLoading(true);
-      let url = 'http://127.0.0.1:8080/cases/clinical_case_list';
+      let url = `${API_URL}/cases/clinical_case_list`;
       
       // Add query parameters if provided
       const params = new URLSearchParams();
@@ -64,7 +65,7 @@ export default function ClinicalCases() {
     const loadingToast = toast.loading('Creando caso clínico...');
     try {
       setLoading(true);
-      const response = await fetchWithAuth('http://127.0.0.1:8080/cases/clinical_case', {
+      const response = await fetchWithAuth(`${API_URL}/cases/clinical_case`, {
         method: 'POST',
         body: JSON.stringify({
           patient_id: patientIdSearch,

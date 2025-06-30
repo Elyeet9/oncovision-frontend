@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import fetchWithAuth from '@/utils/fetchWithAuth';
+import { API_URL } from '@/utils/config';
 
 // Define a type for patient data
 interface Patient {
@@ -36,7 +37,7 @@ export default function PatientsPage() {
   const fetchPatients = async (name = '', lastName = '', idNumber = '', history = '') => {
     try {
       setLoading(true);
-      let url = 'http://127.0.0.1:8080/patients/patient_list';
+      let url = `${API_URL}/patients/patient_list`;
       
       // Add query parameters if provided
       const params = new URLSearchParams();
@@ -69,7 +70,7 @@ export default function PatientsPage() {
     const loadingToast = toast.loading('Registrando paciente...');
     try {
       setLoading(true);
-      const response = await fetchWithAuth('http://127.0.0.1:8080/patients/patient_create', {
+      const response = await fetchWithAuth(`${API_URL}/patients/patient_create`, {
         method: 'POST',
         body: JSON.stringify({
           names: nameSearch,

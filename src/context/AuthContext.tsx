@@ -1,6 +1,7 @@
 'use client';
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/utils/config';
 
 // Define types
 interface AuthContextType {
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const refresh = localStorage.getItem('refreshToken');
         if (!refresh) return;
         
-        const response = await fetch('http://127.0.0.1:8080/api/token/refresh/', {
+        const response = await fetch(`${API_URL}/api/token/refresh/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Login function
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://127.0.0.1:8080/api/token/', {
+      const response = await fetch(`${API_URL}/api/token/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
