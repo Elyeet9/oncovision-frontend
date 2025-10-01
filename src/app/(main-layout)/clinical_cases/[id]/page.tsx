@@ -1513,6 +1513,24 @@ export default function ClinicalCaseDetail() {
           </div>
         )}
       </div>
+      {/* Preloading the full screen images */}
+      {clinicalCase?.medical_images && (
+        <div className="hidden">
+          {clinicalCase.medical_images
+            .filter(img => img.state === 'analyzed')
+            .map((image) => (
+              <Image
+                key={`preload-${image.id}`}
+                src={`${API_URL}/${image.full_image}`}
+                alt=""
+                width={2000}
+                height={2000}
+                priority={true}
+                quality={100}
+              />
+            ))}
+        </div>
+      )}
     </div>
   );
 }
