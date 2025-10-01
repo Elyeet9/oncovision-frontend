@@ -1416,7 +1416,8 @@ export default function ClinicalCaseDetail() {
                   width={2000}
                   height={2000}
                   className="object-contain max-w-full max-h-full"
-                  priority
+                  priority={true}
+                  quality={100}
                 />
                 
                 {/* Show nodule markers in fullscreen if highlights are enabled */}
@@ -1525,6 +1526,7 @@ export default function ClinicalCaseDetail() {
                 alt=""
                 width={2000}
                 height={2000}
+                className="object-contain max-w-full max-h-full"
                 priority={true}
                 quality={100}
               />
