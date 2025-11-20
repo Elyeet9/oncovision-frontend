@@ -1,0 +1,45 @@
+@echo off
+echo ========================================
+echo   OncoVision Frontend - Servidor Next.js
+echo ========================================
+echo.
+
+REM Verificar si Node.js está instalado
+node --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ERROR: Node.js no está instalado o no está en PATH
+    echo Por favor, instale Node.js desde https://nodejs.org/
+    pause
+    exit /b 1
+)
+
+REM Verificar si existen las dependencias
+if not exist node_modules (
+    echo ERROR: No se encontraron las dependencias instaladas.
+    echo Por favor, ejecute setup_frontend.bat primero.
+    pause
+    exit /b 1
+)
+
+REM Verificar si existe el archivo .env.local
+if not exist .env.local (
+    echo ADVERTENCIA: No se encontró el archivo .env.local
+    echo ¿Desea crear uno con la configuración por defecto? (S/N)
+    set /p createenv=
+    if /i "%createenv%"=="S" (
+        echo NEXT_PUBLIC_API_URL=http://0.0.0.0:8080 > .env.local
+        echo NEXT_PUBLIC_API_IP=0.0.0.0 >> .env.local
+        echo NEXT_PUBLIC_API_PORT=8080 >> .env.local
+        echo.
+        echo Archivo .env.local creado con configuración por defecto
+        echo.
+    )
+)
+
+echo Iniciando servidor Next.js en http://localhost:3000/
+echo.
+echo Presione Ctrl+C para detener el servidor
+echo ========================================
+echo.
+
+npm run dev
