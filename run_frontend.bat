@@ -27,8 +27,8 @@ if not exist .env.local (
     echo Desea crear uno con la configuracion por defecto? (S/N)
     set /p createenv=
     if /i "%createenv%"=="S" (
-        echo NEXT_PUBLIC_API_URL=http://0.0.0.0:8080 > .env.local
-        echo NEXT_PUBLIC_API_IP=0.0.0.0 >> .env.local
+        echo NEXT_PUBLIC_API_URL=http://127.0.0.1:8080 > .env.local
+        echo NEXT_PUBLIC_API_IP=127.0.0.1 >> .env.local
         echo NEXT_PUBLIC_API_PORT=8080 >> .env.local
         echo.
         echo Archivo .env.local creado con configuracion por defecto
