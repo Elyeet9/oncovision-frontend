@@ -4,10 +4,10 @@ echo   OncoVision Frontend - Servidor Next.js
 echo ========================================
 echo.
 
-REM Verificar si Node.js está instalado
+REM Verificar si Node.js esta instalado
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Node.js no está instalado o no está en PATH
+    echo ERROR: Node.js no esta instalado o no esta en PATH
     echo Por favor, instale Node.js desde https://nodejs.org/
     pause
     exit /b 1
@@ -23,15 +23,15 @@ if not exist node_modules (
 
 REM Verificar si existe el archivo .env.local
 if not exist .env.local (
-    echo ADVERTENCIA: No se encontró el archivo .env.local
-    echo ¿Desea crear uno con la configuración por defecto? (S/N)
+    echo ADVERTENCIA: No se encontro el archivo .env.local
+    echo Desea crear uno con la configuracion por defecto? (S/N)
     set /p createenv=
     if /i "%createenv%"=="S" (
         echo NEXT_PUBLIC_API_URL=http://0.0.0.0:8080 > .env.local
         echo NEXT_PUBLIC_API_IP=0.0.0.0 >> .env.local
         echo NEXT_PUBLIC_API_PORT=8080 >> .env.local
         echo.
-        echo Archivo .env.local creado con configuración por defecto
+        echo Archivo .env.local creado con configuracion por defecto
         echo.
     )
 )
@@ -42,4 +42,4 @@ echo Presione Ctrl+C para detener el servidor
 echo ========================================
 echo.
 
-npm run dev
+call npm run dev
